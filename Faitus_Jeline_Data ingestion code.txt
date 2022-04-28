@@ -1,0 +1,67 @@
+Please find below the python program
+import requests
+import json
+import pymysql
+import urllib.request
+import mysql.connector
+import datetime
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+mydb = mysql.connector.connect(host='localhost',
+    user='root',
+    password = '*******',                           
+    db='mydb')
+
+
+# 5) Add incremental fetch design, logging to python script
+duration = ["https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-01-01&endtime=2017-01-31",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-02-01&endtime=2017-02-28",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-03-01&endtime=2017-03-31",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-04-01&endtime=2017-04-30",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-05-01&endtime=2017-05-31",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-06-01&endtime=2017-06-30",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-07-01&endtime=2017-07-31",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-08-01&endtime=2017-08-31",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-09-01&endtime=2017-09-30",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-10-01&endtime=2017-10-30",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-11-01&endtime=2017-11-31",
+"https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2017-12-01&endtime=2017-12-31"]
+
+
+for dur in duration:
+
+    cursor = mydb.cursor()
+    url = dur
+    urllib.request.urlopen(url).read()
+    response = urllib.request.urlopen(url).read()
+    
+    #2) Read a JSON response from the API
+
+    json_obj = response
+    json_obj = json.loads(response)
+    
+    
+    json_obj = json_obj['features']
+
+
+    for obj in json_obj:
+        print(obj["type"])
+        print(obj["properties"])
+        magnitude = obj["properties"]['mag']
+        print(magnitude)
+        
+        time = obj["properties"]['time']
+        ts = int(time)/1000
+        readabletime = datetime.datetime.fromtimestamp(ts)
+        print(readabletime)
+        
+        location = obj["properties"]['place']
+        print(location)
+        
+        cursor.execute("INSERT INTO earthquake (type , properties, magnitude, readabletime,location) VALUES (%s,%s,%s,%s,%s)", (str(obj["type"]), str(obj["properties"]),magnitude, readabletime,location))
+
+        
+  mydb.commit()
+  mydb.close()

@@ -1,0 +1,83 @@
+Scenario1:
+----------
+Using Matplotlib python library, I plotted the top 10 country where the with most earthquake in 2017. 
+
+
+# Connecting to mysql database
+import mysql.connector
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas
+ 
+
+mydb = mysql.connector.connect(host='localhost',
+    user='root',
+    password = 'mysqllogin',                           
+    db='mydb')
+
+mycursor = mydb.cursor()
+ 
+# Fecthing Data From mysql to my python progame
+mycursor.execute("select count(magnitude) no_of_earthquake, substr(location,instr(location,',')+1,length(location)) as country from earthquake where magnitude >= 4 group by substr(location,instr(location,',')+1,length(location)) order by no_of_earthquake desc limit 10")
+result = mycursor.fetchall
+      
+no_of_earthquake = []
+country = []
+
+for i in mycursor:
+    no_of_earthquake.append(i[0])
+    country.append(i[1])
+
+     
+f = plt.figure()
+f.set_figwidth(15)
+f.set_figheight(10)
+
+#plt.bar(magnitude,readabletime)
+plt.bar(country,no_of_earthquake)
+plt.figure(figsize=(100,100))
+
+plt.show()
+
+
+Scenario 2: 
+----------
+Using Matplotlib python library, I observed that, earthquake with magnitude greater than 6 occurred in the month of January 2017. 
+
+# Connecting to mysql database
+import mysql.connector
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas
+ 
+
+mydb = mysql.connector.connect(host='localhost',
+    user='root',
+    password = 'mysqllogin',                           
+    db='mydb')
+
+
+
+mycursor = mydb.cursor()
+ 
+mycursor.execute("select magnitude, readabletime,location from earthquake where magnitude >= 6")
+result = mycursor.fetchall
+
+        
+magnitude = []
+readabletime = []
+location = []
+
+
+for i in mycursor:
+    magnitude.append(i[0])
+    readabletime.append(i[1])
+    location.append(i)
+     
+plt.scatter(magnitude,readabletime)
+
+plt.show()
+
+
+
+
